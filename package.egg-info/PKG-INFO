@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: package
+Version: 0.1
+Summary: Startup package
+Author: Vlad Myrhorodskyi
+Author-email: mirgorodskiy295@gmail.com
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: scikit-learn
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: mlflow
