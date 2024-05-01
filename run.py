@@ -7,8 +7,10 @@ from package.ml_training.retrieal import get_train_test_set
 from sklearn.ensemble import RandomForestRegressor
 
 if __name__ == '__main__':
-    experiment_name = "randomForestModel"
-    run_name = "run1"
+    model_name = "randomForestModel"
+    experiment_name = "co2 regression"
+    run_name = "run2"
+    artifact_path = "model"
 
     df = preprocess_data()
     X_train, X_test, y_train, y_test = get_train_test_set(df)
@@ -25,6 +27,7 @@ if __name__ == '__main__':
     prefix = "test"
     performance_results = get_performance_plots_regr(y_test, y_pred, prefix)
 
+    mlflow.register_model(model_uri=f"runs:/{run_id}/{artifact_path}", name=model_name)
     # Log performance metrics
     with mlflow.start_run(run_id=run_id):
         # Log parameters

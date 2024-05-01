@@ -143,3 +143,29 @@ def register_model_with_client(model_name: str, run_id: str, artifact_path: str)
     client = mlflow.tracking.MlflowClient()
     client.create_registered_model(model_name)
     client.create_model_version(name=model_name, source=f"runs:/{run_id}/{artifact_path}")
+
+
+
+def regression_report(true_labels, predictions):
+    """
+    Generate a regression report including Mean Squared Error (MSE), Mean Absolute Error (MAE),
+    and R-squared (R2) for evaluating regression model performance.
+
+    Args:
+        true_labels (array-like): True target values.
+        predictions (array-like): Predicted target values.
+
+    Returns:
+        dict: Dictionary containing regression evaluation metrics.
+    """
+    mse = mean_squared_error(true_labels, predictions)
+    mae = mean_absolute_error(true_labels, predictions)
+    r2 = r2_score(true_labels, predictions)
+
+    report = {
+        "Mean Squared Error (MSE)": mse,
+        "Mean Absolute Error (MAE)": mae,
+        "R-squared (R2)": r2
+    }
+
+    return report
