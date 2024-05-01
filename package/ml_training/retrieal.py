@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 def get_train_test_set(df: pd.DataFrame) -> Tuple:
 	# Feature selection
-	X = df.drop(columns=['Timestamp', 'co2', 'noise', 'nox', 'dust'])
+	X = df.drop(columns=['Timestamp', 'co2', 'noise', 'dust'])
 
 	# Target variable
 	y = df['co2']
