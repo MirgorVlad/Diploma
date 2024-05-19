@@ -10,11 +10,10 @@ from sklearn.svm import SVR
 
 def load_data() -> pd.DataFrame:
 	# df = pd.read_csv("/home/thingsboard563/Private/ml_project/sensor_data.csv", sep=";")
-	df = pd.read_csv("D:\\University\\Diploma\\package\\sensor_data.csv", sep=";")
+	df = pd.read_csv("data/sensor_data.csv", sep=";")
 	return df
 
-def preprocess_data() -> pd.DataFrame:
-	df = load_data()
+def preprocess_data(df:pd.DataFrame) -> pd.DataFrame:
 	# Parse timestamp column
 	df['Timestamp'] = pd.to_datetime(df['Timestamp'])
 
@@ -26,7 +25,9 @@ def preprocess_data() -> pd.DataFrame:
 
 
 	# Handle missing values (replace with mean)
+	pd.set_option('future.no_silent_downcasting', True)
 	df.fillna(df.mean(), inplace=True)
+	df = df.infer_objects(copy=False)
 
 	# Feature Scaling
 	# Extract numerical columns (excluding 'Timestamp')

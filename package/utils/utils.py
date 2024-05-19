@@ -1,4 +1,5 @@
 import mlflow
+import numpy as np
 from sklearn.metrics import RocCurveDisplay
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import PrecisionRecallDisplay
@@ -36,7 +37,7 @@ def set_or_create_experiment(experiment_name: str) -> str:
 
 
 def get_performance_plots(
-    y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
+        y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
 ) -> Dict[str, any]:
     """
     Get performance plots.
@@ -62,7 +63,7 @@ def get_performance_plots(
     }
 
 def get_performance_plots_regr(
-    y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
+        y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
 ) -> Dict[str, any]:
     """
     Get performance plots for regression models.
@@ -76,7 +77,7 @@ def get_performance_plots_regr(
     mse = mean_squared_error(y_true, y_pred)
     mae = mean_absolute_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
-    
+
     # Plot true vs predicted values
     plt.figure(figsize=(10, 5))
     plt.scatter(y_true, y_pred, color='blue', alpha=0.5)
@@ -87,7 +88,7 @@ def get_performance_plots_regr(
     plt.grid(True)
     true_pred_figure = plt.gcf()
     plt.close()  # Close the figure to release memory
-    
+
     # Plot residual plot
     plt.figure(figsize=(10, 5))
     residuals = y_true - y_pred
@@ -108,9 +109,70 @@ def get_performance_plots_regr(
         "r2": r2
     }
 
+def get_performance_plots_regr_with_data(
+        X: pd.DataFrame, y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
+) -> Dict[str, any]:
+    """
+    Get performance plots for regression models along with input data visualization.
+
+    :param X: Input features.
+    :param y_true: True labels.
+    :param y_pred: Predicted labels.
+    :param prefix: Prefix for the plot names.
+    :return: Performance plots.
+    """
+    # Calculate regression metrics
+    mse = mean_squared_error(y_true, y_pred)
+    mae = mean_absolute_error(y_true, y_pred)
+    r2 = r2_score(y_true, y_pred)
+
+    # Plot true vs predicted values
+    plt.figure(figsize=(15, 5))
+    plt.subplot(1, 2, 1)
+    plt.scatter(y_true, y_pred, color='blue', alpha=0.5)
+    plt.plot([min(y_true), max(y_true)], [min(y_true), max(y_true)], color='red', linestyle='--')
+    plt.title('True vs Predicted Values')
+    plt.xlabel('True Values')
+    plt.ylabel('Predicted Values')
+    plt.grid(True)
+
+    # Plot input data
+    plt.subplot(1, 2, 2)
+    # plt.scatter(X, y_true, color='blue', label='True', alpha=0.5)
+    plt.scatter(X, y_pred, color='red', label='Predicted', alpha=0.5)
+    plt.title('Input Data with Predicted Values')
+    plt.xlabel('Input Data')
+    plt.ylabel('True and Predicted Values')
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    true_pred_figure = plt.gcf()
+    plt.close()  # Close the figure to release memory
+
+    # Plot residual plot
+    plt.figure(figsize=(10, 5))
+    residuals = y_true - y_pred
+    plt.scatter(y_pred, residuals, color='blue', alpha=0.5)
+    plt.axhline(y=0, color='red', linestyle='--')
+    plt.title('Residual Plot')
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Residuals')
+    plt.grid(True)
+    residual_figure = plt.gcf()
+    plt.close()  # Close the figure to release memory
+
+    return {
+        f"{prefix}_true_vs_pred_with_data": true_pred_figure,
+        f"{prefix}_residual_plot": residual_figure,
+        "mse": mse,
+        "mae": mae,
+        "r2": r2
+    }
+
 
 def get_classification_metrics(
-    y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
+        y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
 ) -> Dict[str, float]:
     """
     Log classification metrics.
@@ -130,6 +192,7 @@ def get_classification_metrics(
 
     return metrics
 
+
 def register_model_with_client(model_name: str, run_id: str, artifact_path: str):
     """
     Register a model.
@@ -143,7 +206,6 @@ def register_model_with_client(model_name: str, run_id: str, artifact_path: str)
     client = mlflow.tracking.MlflowClient()
     client.create_registered_model(model_name)
     client.create_model_version(name=model_name, source=f"runs:/{run_id}/{artifact_path}")
-
 
 
 def regression_report(true_labels, predictions):

@@ -9,5 +9,5 @@ def train_model(model:RandomForestRegressor, run_name:str, x:pd.DataFrame, y:pd.
 	signature = infer_signature(x,y)
 	with mlflow.start_run(run_name=run_name) as run:
 		model.fit(x, y)
-		mlflow.sklearn.log_model(sk_model=model, artifact_path="model", signature=signature)
+		mlflow.sklearn.log_model(sk_model=model, artifact_path="artifacts", signature=signature)
 	return run.info.run_id

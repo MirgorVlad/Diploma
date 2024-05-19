@@ -1,18 +1,20 @@
 import mlflow
-from package.feature.data_processing import preprocess_data
+from package.feature.data_processing import *
 from package.utils.utils import set_or_create_experiment
 from package.utils.utils import get_performance_plots_regr
 from package.ml_training.train import train_model
 from package.ml_training.retrieal import get_train_test_set
 from sklearn.ensemble import RandomForestRegressor
+from package.utils.data_generator import generate_random_data_with_trends
+from package.utils.online_inference import send_request
 
 if __name__ == '__main__':
-    model_name = "randomForestModel"
-    experiment_name = "co2 regression"
-    run_name = "run2"
+    model_name = "rfm"
+    experiment_name = "co2 prediction"
+    run_name = "run01"
     artifact_path = "model"
 
-    df = preprocess_data()
+    df = preprocess_data(load_data())
     X_train, X_test, y_train, y_test = get_train_test_set(df)
     experiment_id = set_or_create_experiment(experiment_name=experiment_name)
 
@@ -26,8 +28,8 @@ if __name__ == '__main__':
 
     prefix = "test"
     performance_results = get_performance_plots_regr(y_test, y_pred, prefix)
-
-    mlflow.register_model(model_uri=f"runs:/{run_id}/{artifact_path}", name=model_name)
+    
+    # mlflow.register_model(model_uri=f"runs:/{run_id}/{artifact_path}", name=model_name)
     # Log performance metrics
     with mlflow.start_run(run_id=run_id):
         # Log parameters
