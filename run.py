@@ -10,13 +10,11 @@ from package.utils.online_inference import send_request
 
 if __name__ == '__main__':
     model_name = "rfm"
-    experiment_name = "co2 prediction"
-    run_name = "run01"
-    artifact_path = "model"
+    run_name = "run02"
+    artifact_path = "artifacts"
 
     df = preprocess_data(load_data())
     X_train, X_test, y_train, y_test = get_train_test_set(df)
-    experiment_id = set_or_create_experiment(experiment_name=experiment_name)
 
     n_estimators = 100
     random_state = 42
@@ -29,7 +27,7 @@ if __name__ == '__main__':
     prefix = "test"
     performance_results = get_performance_plots_regr(y_test, y_pred, prefix)
     
-    # mlflow.register_model(model_uri=f"runs:/{run_id}/{artifact_path}", name=model_name)
+    mlflow.register_model(model_uri=f"runs:/{run_id}/{artifact_path}", name=model_name)
     # Log performance metrics
     with mlflow.start_run(run_id=run_id):
         # Log parameters
@@ -37,7 +35,6 @@ if __name__ == '__main__':
         mlflow.log_param("random_state", random_state)
 
         # Set tags
-        mlflow.set_tag("experiment_name", experiment_name)
         mlflow.set_tag("run_name", run_name)
 
         # Log performance metrics

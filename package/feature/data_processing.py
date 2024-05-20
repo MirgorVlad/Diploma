@@ -29,11 +29,11 @@ def preprocess_data(df:pd.DataFrame) -> pd.DataFrame:
 	df.fillna(df.mean(), inplace=True)
 	df = df.infer_objects(copy=False)
 
-	# Feature Scaling
-	# Extract numerical columns (excluding 'Timestamp')
-	numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
-	# Scale numerical features
-	scaler = StandardScaler()
-	df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+	# # Feature Scaling
+	# # Extract numerical columns (excluding 'Timestamp')
+	# numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
+	# # Scale numerical features
+	# scaler = StandardScaler()
+	# df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
 
 	return df

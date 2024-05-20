@@ -7,20 +7,12 @@ from package.utils.online_inference import send_request
 from package.feature.data_processing import preprocess_data
 import os
 import mlflow
-
-SENSOR_DATA = "../../data/sensor_data.csv"
-OUT_DATA = "../../data/generated_sensor_data.csv"
+# TODO delete
+SENSOR_DATA = "data/sensor_data.csv"
+OUT_DATA = "data/generated_sensor_data.csv"
 
 # Read the data into a pandas DataFrame
 df = pd.read_csv(SENSOR_DATA, sep=";")
-
-
-def get_model(run_id):
-    model_uri = f"runs:/{run_id}/model"
-    return mlflow.sklearn.load_model(model_uri)
-
-def predict(model, data):
-    model.predict(data)
 
 # Define a function to generate random dates in sequence
 def sequential_date(start, period, index):
@@ -73,8 +65,3 @@ def generate_random_data_with_trends(num_rows):
         send_request(preprocess_data(row.to_frame().T))
         time.sleep(time_interval_seconds)
     return rows
-
-
-
-if __name__ == '__main__':
-    generate_random_data_with_trends(100)
