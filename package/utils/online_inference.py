@@ -1,11 +1,6 @@
-from package.feature.data_processing import preprocess_data
-from package.ml_training.retrieal import get_train_test_score_set
-import numpy as np
 import pandas as pd
 import json
 import requests
-import mlflow
-from pprint import pprint
 
 def send_request(x: pd.DataFrame):
     features = [f for f in x.columns if f not in ['Timestamp', 'co2', 'noise', 'dust']]
