@@ -27,6 +27,6 @@ if __name__ == "__main__":
     while True:
         generate_random_data_with_trends(100, SENSOR_DATA, OUT_DATA)
         new_data = pd.read_csv(OUT_DATA, sep=",")
-        current_run_id, active_process = monitor_and_retrain(new_data, initial_run_id, active_process, 0.05)
+        current_run_id, active_process = monitor_and_retrain(new_data, initial_run_id, active_process, target, 0.05)
         initial_run_id = current_run_id  # Update to the latest model run id
         time.sleep(60)  # Monitor every minute
