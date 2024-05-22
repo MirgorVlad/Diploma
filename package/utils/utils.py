@@ -63,7 +63,7 @@ def get_performance_plots(
     }
 
 def get_performance_plots_regr(
-        y_true: pd.DataFrame, y_pred: pd.DataFrame, prefix: str
+        y_true: pd.DataFrame, y_pred: pd.DataFrame
 ) -> Dict[str, any]:
     """
     Get performance plots for regression models.
@@ -102,8 +102,8 @@ def get_performance_plots_regr(
     plt.close()  # Close the figure to release memory
 
     return {
-        f"{prefix}_true_vs_pred": true_pred_figure,
-        f"{prefix}_residual_plot": residual_figure,
+        "true_vs_pred": true_pred_figure,
+        "residual_plot": residual_figure,
         "mse": mse,
         "mae": mae,
         "r2": r2

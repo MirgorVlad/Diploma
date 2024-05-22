@@ -40,9 +40,9 @@ def retrain_model():
     model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state)
 
     with mlflow.start_run(run_name=run_name) as run:
-        mlflow.register_model(model_uri=f"runs:/{run.info.run_id}/{artifact_path}", name=model_name)
         model.fit(X_train, y_train)
-        # mlflow.sklearn.log_model(model, model_name)
+        mlflow.register_model(model_uri=f"runs:/{run.info.run_id}/{artifact_path}", name=model_name)
+        mlflow.sklearn.log_model(model, model_name)
         y_pred = model.predict(X_test)
 
         performance_results = get_performance_plots_regr(y_test, y_pred, "test")
