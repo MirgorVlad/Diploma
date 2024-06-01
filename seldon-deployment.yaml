@@ -1,0 +1,21 @@
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: flask-app
+spec:
+  name: seldon-deployment
+  predictors:
+  - graph:
+      name: flask-app
+      implementation: CUSTOM
+      modelUri: file:///mnt/models/model.pkl
+
+      endpoint:
+        type: REST
+    componentSpecs:
+    - spec:
+        containers:
+        - name: flask-app
+          image: mirgor75/flask_app:latest
+    name: default
+    replicas: 1
