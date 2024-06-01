@@ -17,8 +17,8 @@ if __name__ == "__main__":
 
     X = df.drop(columns=[target])
     y = df[target]
-    initial_run_id, initial_accuracy = train_and_log_model(X, y)
-    print(f"Initial model accuracy: {initial_accuracy}")
+    initial_run_id, initial_mse = train_and_log_model(X, y)
+    print(f"Initial MSE: {initial_mse}")
 
     # Start data generation and monitoring loop
     active_process = deploy_model(initial_run_id, GREEN_PORT)

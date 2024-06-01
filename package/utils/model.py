@@ -1,8 +1,8 @@
 import subprocess
 import time
-from sklearn.ensemble import RandomForestClassifier
+import lightgbm as lgb
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, mean_squared_error
 import mlflow
 import mlflow.sklearn
 from package.utils.utils import set_or_create_experiment, get_performance_plots_regr
@@ -10,28 +10,41 @@ from package.utils.utils import set_or_create_experiment, get_performance_plots_
 def train_and_log_model(X, y, experiment_name="experiment"):
     experiment_id = set_or_create_experiment(experiment_name)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = RandomForestClassifier(n_estimators=20, random_state=42)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    performance_results = get_performance_plots_regr(y_test, y_pred)
 
+    # Create the LightGBM dataset
+    train_data = lgb.Dataset(X_train, label=y_train)
+    test_data = lgb.Dataset(X_test, label=y_test)
+
+    # Define parameters
+    params = {
+        'objective': 'regression',
+        'metric': 'rmse',
+        'boosting_type': 'gbdt',
+        'num_leaves': 31,
+        'learning_rate': 0.05,
+        'feature_fraction': 0.9
+    }
+
+    model = lgb.train(params, train_data, valid_sets=[test_data])
+    y_pred = model.predict(X_test, num_iteration=model.best_iteration)
+
+
+    performance_results = get_performance_plots_regr(y_test, y_pred)
+    mse = performance_results["mse"]
     with mlflow.start_run(run_name="run") as run:
-        mlflow.sklearn.log_model(sk_model=model, artifact_path="model")
-        mlflow.log_param("n_estimators", model.n_estimators)
-        mlflow.log_param("max_depth", model.max_depth)
-        mlflow.log_metric("accuracy", accuracy)
-        mlflow.log_metric("MSE", performance_results["mse"])
+        mlflow.sklearn.log_model(model, "model")
+        mlflow.log_params(params)
+        mlflow.log_metric("MSE", mse)
         mlflow.log_metric("MAE", performance_results["mae"])
         mlflow.log_metric("R2", performance_results["r2"])
         mlflow.log_figure(performance_results["true_vs_pred"], "true_vs_pred.png")
         mlflow.log_figure(performance_results["residual_plot"], "residual_plot.png")
 
-        return mlflow.active_run().info.run_id, accuracy
+        return mlflow.active_run().info.run_id, mse
 
 def predict(model_uri, input_data):
     model = mlflow.pyfunc.load_model(model_uri)
-    predictions = model.predict(input_data)
+    predictions = model.predict(input_data, num_iteration=model.best_iteration)
     return predictions
 
 
@@ -59,16 +72,14 @@ def set_active_model_port(port):
 
 def monitor_and_retrain(new_data, current_run_id, active_process, target, threshold=0.05):
     model_uri = f"runs:/{current_run_id}/model"
-    model = mlflow.pyfunc.load_model(model_uri)
-
     y_true = new_data[target]
     X_new = new_data.drop(columns=[target])
-    y_pred = model.predict(X_new)
+    y_pred = predict(model_uri, X_new)
 
-    new_accuracy = accuracy_score(y_true, y_pred)
-    print(f"New Accuracy: {new_accuracy}")
+    new_accuracy = mean_squared_error(y_true, y_pred)
+    print(f"New MSE: {new_accuracy}")
 
-    old_accuracy = mlflow.get_run(current_run_id).data.metrics['accuracy']
+    old_accuracy = mlflow.get_run(current_run_id).data.metrics['MSE']
     if (old_accuracy - new_accuracy) > threshold:
         print("Retraining model...")
         new_run_id, new_accuracy = train_and_log_model(X_new, y_true)
