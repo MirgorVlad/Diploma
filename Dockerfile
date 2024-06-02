@@ -12,8 +12,7 @@ COPY app.py /app/app.py
 # Set the working directory
 WORKDIR /app
 
-# Expose the port for Flask app
-EXPOSE 5001
+COPY . .
 
 # Command to run Flask app
 CMD ["python", "app.py"]
