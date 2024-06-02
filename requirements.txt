@@ -1,0 +1,9 @@
+seldon-core
+joblib
+scikit-learn
+flask
+mlflow
+pandas
+lightgbm
+matplotlib
+typing
