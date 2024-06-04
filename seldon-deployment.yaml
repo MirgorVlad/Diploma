@@ -1,21 +1,14 @@
 apiVersion: machinelearning.seldon.io/v1
 kind: SeldonDeployment
 metadata:
-  name: flask-app
+  name: model-test-2
+  namespace: seldon
 spec:
-  name: seldon-deployment
+  name: iris
   predictors:
   - graph:
-      name: flask-app
-      implementation: CUSTOM
-      modelUri: file:///mnt/models/model.pkl
-
-      endpoint:
-        type: REST
-    componentSpecs:
-    - spec:
-        containers:
-        - name: flask-app
-          image: mirgor75/flask_app:latest
+      implementation: SKLEARN_SERVER
+      modelUri: gs://mirgor_model/mnt/models/model.pkl
+      name: classifier
     name: default
     replicas: 1

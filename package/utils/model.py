@@ -1,3 +1,5 @@
+import os
+
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 import mlflow
@@ -6,7 +8,12 @@ import mlflow.sklearn
 from package.feature.data_processing import load_data
 from package.utils.utils import set_or_create_experiment, get_performance_plots_regr
 
-def initial_training(experiment_name="experiment"):
+DEFAULT_EXPERIMENT = "/mlflow/experiment1"
+os.environ["DATABRICKS_HOST"] = "https://adb-885663335553786.6.azuredatabricks.net/"
+os.environ["DATABRICKS_TOKEN"] = "dapi5ba3bb5e61f16660f9c3057b7c90d7e5-3"
+mlflow.set_tracking_uri("databricks")
+
+def initial_training(experiment_name=DEFAULT_EXPERIMENT):
     df = load_data()
     target = "co2"
 
@@ -45,7 +52,9 @@ def initial_training(experiment_name="experiment"):
 
         return model
 
-def train_and_log_model(X, y, experiment_name="experiment"):
+def train_and_log_model(X, y, experiment_name=DEFAULT_EXPERIMENT):
+    # mlflow.set_experiment(experiment_name)
+    # mlflow.create_experiment("experiments/test/experiment1")
     experiment_id = set_or_create_experiment(experiment_name)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 

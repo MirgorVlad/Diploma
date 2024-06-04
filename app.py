@@ -8,7 +8,7 @@ from package.utils.model import train_and_log_model, initial_training
 
 
 # Path to save the model
-MODEL_PATH = "mnt/models/model.pkl"
+MODEL_PATH = "./models/model.pkl"
 
 # Global model variable
 model = None
