@@ -8,33 +8,32 @@ import mlflow.sklearn
 from package.feature.data_processing import load_data
 from package.utils.utils import set_or_create_experiment, get_performance_plots_regr
 
+target = "co2"
+DATA_PATH = "data/sensor_data.csv"
 DEFAULT_EXPERIMENT = "/mlflow/experiment1"
 os.environ["DATABRICKS_HOST"] = "https://adb-885663335553786.6.azuredatabricks.net/"
 os.environ["DATABRICKS_TOKEN"] = "dapi5ba3bb5e61f16660f9c3057b7c90d7e5-3"
 mlflow.set_tracking_uri("databricks")
+# Define parameters
+params = {
+    'objective': 'regression',
+    'metric': 'rmse',
+    'boosting_type': 'gbdt',
+    'num_leaves': 31,
+    'learning_rate': 0.05,
+    'feature_fraction': 0.9
+}
 
 def initial_training(experiment_name=DEFAULT_EXPERIMENT):
-    df = load_data()
-    target = "co2"
-
+    df = load_data(DATA_PATH)
     X = df.drop(columns=[target])
     y = df[target]
-    experiment_id = set_or_create_experiment(experiment_name)
+    set_or_create_experiment(experiment_name)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Create the LightGBM dataset
     train_data = lgb.Dataset(X_train, label=y_train)
     test_data = lgb.Dataset(X_test, label=y_test)
-
-    # Define parameters
-    params = {
-        'objective': 'regression',
-        'metric': 'rmse',
-        'boosting_type': 'gbdt',
-        'num_leaves': 31,
-        'learning_rate': 0.05,
-        'feature_fraction': 0.9
-    }
 
     model = lgb.train(params, train_data, valid_sets=[test_data])
     y_pred = model.predict(X_test, num_iteration=model.best_iteration)
@@ -88,3 +87,31 @@ def train_and_log_model(X, y, experiment_name=DEFAULT_EXPERIMENT):
         mlflow.log_figure(performance_results["residual_plot"], "residual_plot.png")
 
         return mlflow.active_run().info.run_id, mse, model
+
+def check_degradation(initial_mse, path):
+    df = load_data(path)
+    X = df.drop(columns=[target])
+    y = df[target]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Create the LightGBM dataset
+    train_data = lgb.Dataset(X_train, label=y_train)
+    test_data = lgb.Dataset(X_test, label=y_test)
+
+    model = lgb.train(params, train_data, valid_sets=[test_data])
+    y_pred = model.predict(X_test, num_iteration=model.best_iteration)
+
+    performance_results = get_performance_plots_regr(y_test, y_pred)
+    mse = performance_results["mse"]
+
+    if mse < initial_mse:
+        print("Model needs retraining")
+        return True
+
+    print("Model doesn't need retraining")
+    return False
+
+
+def get_runs():
+    experiment = mlflow.get_experiment_by_name(DEFAULT_EXPERIMENT)
+    return mlflow.search_runs(experiment_ids=[experiment.experiment_id], order_by=["start_time DESC"])

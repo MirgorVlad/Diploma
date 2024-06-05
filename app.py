@@ -4,8 +4,7 @@ import pandas as pd
 import joblib
 import mlflow
 import mlflow.sklearn
-from package.utils.model import train_and_log_model, initial_training
-
+from package.utils.model import train_and_log_model, initial_training, get_runs
 
 # Path to save the model
 MODEL_PATH = "./models/model.pkl"
@@ -61,9 +60,7 @@ def retrain():
 
 @app.route('/statistics', methods=['GET'])
 def statistics():
-    global model
-    experiment = mlflow.get_experiment_by_name("experiment")
-    runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id], order_by=["start_time DESC"])
+    runs = get_runs()
     latest_run = runs.iloc[0]
     stats = {
         "run_id": latest_run.run_id,

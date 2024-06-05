@@ -91,4 +91,4 @@ def deploy_model(model_uri: str, namespace: str = "seldon"):
             print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    deploy_model("gs://mirgor_model/mnt/models/model.pkl")
+    deploy_model("https://storage.googleapis.com/mirgor_model/model.pkl")
