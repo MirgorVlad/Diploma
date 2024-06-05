@@ -75,8 +75,8 @@ def generate_random_data_with_trends(num_rows):
         time.sleep(1)  # wait 1 second before sending the next data point
 
 
-def send_switch_request(payload):
-    response = requests.post(MODEL_URL + "switch", json=payload)
+def send_switch_request():
+    response = requests.post(MODEL_URL + "switch")
     print(response.json())
 
 def send_prediction_request(payload):
