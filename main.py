@@ -64,13 +64,20 @@ def generate_random_data_with_trends(num_rows):
             if(prediction > TARGET_THRESHOLD_MAX or prediction < TARGET_THRESHOLD_MIN):
                 print("Model reach prediction threshold!")
                 statistics = send_statistics_request()
-                if(check_degradation(statistics["MSE"], OUT_CSV_FILE_PATH)):
-                    send_retrain_request(OUT_CSV_FILE_PATH)
+                current_mse = statistics["MSE"]
+                retrain_data = send_retrain_request(OUT_CSV_FILE_PATH)
+                new_mse = retrain_data["MSE"]
+                if(check_degradation(current_mse, new_mse)):
+                    send_switch_request()
 
             data.to_csv(OUT_CSV_FILE_PATH, mode='a', sep=',', index=False, header=False)
             # Wait before sending the next request
         time.sleep(1)  # wait 1 second before sending the next data point
 
+
+def send_switch_request(payload):
+    response = requests.post(MODEL_URL + "switch", json=payload)
+    print(response.json())
 
 def send_prediction_request(payload):
     response = requests.post(MODEL_URL + "predict", json=payload)
@@ -82,6 +89,7 @@ def send_retrain_request(file_path):
         response = requests.post(MODEL_URL + "retrain", files={'file': file})
         if response.status_code == 200:
             print("Model retrained successfully")
+            return response.json()
         else:
             return {"status": "Error", "message": response.text}
 
